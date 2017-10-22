@@ -1,0 +1,54 @@
+---
+
+# Ansiblised PaPiRus installation script
+# https://raw.githubusercontent.com/PiSupply/PaPiRus/master/install
+
+- name: Ensure PaPiRus dependencies present
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - git
+    - python-pil
+    - python-smbus
+    - python-dateutil
+    - bc
+    - i2c-tools
+    - fonts-freefont-ttf
+
+- name: Read boot config
+  shell: cat /boot/config.txt
+  changed_when: false
+  register: boot_config
+
+- name: Ensure I2C enabled
+  shell: "raspi-config nonint do_i2c 0"
+  when: '"i2c_arm=on" not in boot_config.stdout'
+
+- name: Ensure SPI enabled
+  shell: "raspi-config nonint do_spi 0"
+  when: '"spi=on" not in boot_config.stdout'
+
+- name: Check if PaPiRus is installed
+  stat:
+    path: /usr/local/bin/papirus-config
+  register: papirus
+
+- set_fact:
+     papirus_installed: "{{ papirus.stat.exists }}"
+
+- name: Checkout PaPiRus project
+  git:
+    repo: 'https://github.com/PiSupply/PaPiRus.git'
+    depth: 1
+    dest: /tmp/checkout
+    update: no
+  when: not papirus_installed
+
+- name: Install Papirus Python library for Python
+  command: /tmp/checkout/setup.py install
+  when: not papirus_installed
+
+- name: Install drivers and setup epaper
+  shell: papirus-setup
+  when: not papirus_installed

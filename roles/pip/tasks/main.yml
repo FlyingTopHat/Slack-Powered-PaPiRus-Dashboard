@@ -1,0 +1,6 @@
+---
+
+- name: Ensure Pip present
+  apt:
+    name: 'python-pip'
+    state: present

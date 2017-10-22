@@ -1,0 +1,6 @@
+---
+
+- name: Ensure Slack Client present
+  pip:
+    name: 'slackclient'
+    state: present
