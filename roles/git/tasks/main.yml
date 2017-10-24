@@ -1,0 +1,6 @@
+---
+
+- name: Ensure Git present
+  apt:
+    name: 'git'
+    state: present

@@ -1,0 +1,18 @@
+---
+
+- name: Checkout Slack-Dashboard project
+  git:
+    repo: 'https://github.com/FlyingTopHat/Slack-Dashboard.git'
+    dest: /usr/local/bin/slack-dashboard
+    update: yes
+
+- name: Ensure dashboard template exists
+  template:
+    src: templates/pi-dashboard.cfg.j2
+    dest: /home/pi/.pi-dashboard.cfg
+
+- name: Ensure dashboard starts with Raspberry Pi
+  lineinfile:
+    path: /etc/rc.local
+    insertbefore: '^exit 0'
+    line: 'python /usr/local/bin/slack-dashboard/main.py /home/pi/.pi-dashboard.cfg &'
